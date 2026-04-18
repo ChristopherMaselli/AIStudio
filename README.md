@@ -25,6 +25,10 @@ bash install.sh
 bash validate_gpu.sh
 ```
 
+The installer currently pins SwarmUI to `0.9.7-Beta` by default instead of
+newer beta builds because `0.9.8-Beta` has caused backend generation issues on
+RTX 5090 systems under Linux.
+
 To start the stack after install:
 
 ```bash

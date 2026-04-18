@@ -78,6 +78,11 @@ BASE_PACKAGES=(
   wget
 )
 
+SWARMUI_REPO_URL="https://github.com/mcmonkeyprojects/SwarmUI.git"
+SWARMUI_REF="0.9.7-Beta"
+COMFYUI_REPO_URL="https://github.com/comfyanonymous/ComfyUI.git"
+COMFYUI_REF="master"
+
 track_path() {
   local path="$1"
   if ! grep -Fxq "$path" "$PATHS_MANIFEST" 2>/dev/null; then
@@ -230,15 +235,15 @@ EOF
 
 clone_or_update_repo() {
   local repo_url="$1"
-  local branch="$2"
+  local ref="$2"
   local target_dir="$3"
 
   if [[ ! -d "$target_dir/.git" ]]; then
-    git clone --depth 1 --branch "$branch" "$repo_url" "$target_dir"
+    git clone --depth 1 --branch "$ref" "$repo_url" "$target_dir"
   else
-    git -C "$target_dir" fetch origin "$branch" --depth 1
-    git -C "$target_dir" checkout "$branch"
-    git -C "$target_dir" pull --ff-only origin "$branch"
+    git -C "$target_dir" fetch origin "$ref" --depth 1
+    git -C "$target_dir" checkout "$ref"
+    git -C "$target_dir" pull --ff-only origin "$ref"
   fi
 
   track_path "$target_dir"
@@ -285,16 +290,16 @@ STUDIO_SYNC_DEST=""
 EOF
 
   cat >"$STUDIO_ROOT/config/swarmui.env" <<EOF
-STUDIO_SWARMUI_REPO="https://github.com/mcmonkeyprojects/SwarmUI.git"
-STUDIO_SWARMUI_BRANCH="master"
+STUDIO_SWARMUI_REPO="$SWARMUI_REPO_URL"
+STUDIO_SWARMUI_BRANCH="$SWARMUI_REF"
 STUDIO_SWARMUI_HOST="$swarm_host"
 STUDIO_SWARMUI_PORT="7801"
 STUDIO_SWARMUI_ARGS=""
 EOF
 
   cat >"$STUDIO_ROOT/config/comfyui.env" <<EOF
-STUDIO_COMFYUI_REPO="https://github.com/comfyanonymous/ComfyUI.git"
-STUDIO_COMFYUI_BRANCH="master"
+STUDIO_COMFYUI_REPO="$COMFYUI_REPO_URL"
+STUDIO_COMFYUI_BRANCH="$COMFYUI_REF"
 STUDIO_COMFYUI_HOST="$comfy_host"
 STUDIO_COMFYUI_PORT="8188"
 STUDIO_COMFYUI_ARGS=""
@@ -407,10 +412,10 @@ COMFY_DIR="$STUDIO_ROOT/apps/ComfyUI"
 VENV_DIR="$STUDIO_ROOT/env/comfyui"
 
 studio_log "Cloning or updating SwarmUI"
-clone_or_update_repo "https://github.com/mcmonkeyprojects/SwarmUI.git" "master" "$SWARM_DIR"
+clone_or_update_repo "$SWARMUI_REPO_URL" "$SWARMUI_REF" "$SWARM_DIR"
 
 studio_log "Cloning or updating ComfyUI"
-clone_or_update_repo "https://github.com/comfyanonymous/ComfyUI.git" "master" "$COMFY_DIR"
+clone_or_update_repo "$COMFYUI_REPO_URL" "$COMFYUI_REF" "$COMFY_DIR"
 
 studio_log "Building SwarmUI"
 dotnet build "$SWARM_DIR/src/SwarmUI.csproj" --configuration Release -o "$SWARM_DIR/src/bin/live_release"
